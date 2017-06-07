@@ -2,7 +2,8 @@ defmodule BitcoinDeTest do
   use ExUnit.Case
   doctest BitcoinDe
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "start link with invalid credentials" do
+    {:err, message} = BitcoinDe.start_link(self(), %BitcoinDe.Credentials{key: "xxxxx", secret: "cccccc"})
+    assert message == "Invalid credentials" 
   end
 end
