@@ -45,7 +45,7 @@ defmodule BitcoinDe.ApiRequestBuilder do
     url_encode(tail, url_query)
   end
 
-  @spec add_signature(%ApiRequest{}, params) :: String.t
+  @spec add_signature(%ApiRequest{}, params) :: %ApiRequest{} 
   defp add_signature(api_request, params) do
     url_query = params 
                 |> sort 
@@ -55,15 +55,20 @@ defmodule BitcoinDe.ApiRequestBuilder do
                |> String.downcase
     hmac_data = if api_request.method == :post, do: "POST#", else: "GET#"
     hmac_data = hmac_data
-             <> (Application.get_env(:bitcoin_de, :server) |> Map.fetch!(:host))
-             <> api_request.path
-             <> "#"
-             <> (Application.get_env(:bitcoin_de, :credentials) |> Map.fetch!(:key))
-             <> "#"
-             <> (api_request.nonce |> Kernel.inspect)
-             <> "#"
-             <> md5_hash
-    %ApiRequest{api_request | url_query: url_query, signature: hmac_data}
+                <> (Application.get_env(:bitcoin_de, :server) |> Map.fetch!(:host))
+                <> api_request.path
+                <> "#"
+                <> (Application.get_env(:bitcoin_de, :credentials) |> Map.fetch!(:key))
+                <> "#"
+                <> (api_request.nonce |> Kernel.inspect)
+                <> "#"
+                <> md5_hash
+    signature = Application.get_env(:bitcoin_de, :credentials)
+                |> Map.fetch!(:secret)
+                |> (&(:crypto.hmac(:sha256, &1, hmac_data))).()
+                |> Base.encode16
+
+    %ApiRequest{api_request | url_query: url_query, signature: signature}
   end
 
   defp nonce() do
