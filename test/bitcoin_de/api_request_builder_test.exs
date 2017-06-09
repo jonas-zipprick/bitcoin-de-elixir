@@ -1,14 +1,14 @@
 defmodule BitcoinDe.ApiCallBuilderTest do
   use ExUnit.Case
   alias BitcoinDe.ApiRequestBuilder, as: Builder
-
   doctest Builder
 
-  test "create trade" do
-    {:ok, url_query} = Builder.create_trade(:buy, 5.3, 255.50)
-    IO.inspect url_query
-    assert is_bitstring(url_query)
-    # string should be encrypted so the original values should not be readable
-    refute String.contains?(url_query, "buy")
+  setup_all do
+    {:ok, credentials: struct(BitcoinDe.Credentials, Application.get_env(:bitcoin_de, :credentials))}
+  end
+  test "create trade", state do
+    api_request = Builder.show_orderbook(state[:credentials], :buy, 5.3, 255.50)
+    assert is_map(api_request)
+    assert Map.has_key?(api_request, :signature)
   end
 end

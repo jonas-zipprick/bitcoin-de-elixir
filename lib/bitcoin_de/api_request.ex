@@ -1,3 +1,3 @@
 defmodule BitcoinDe.ApiRequest do
-  defstruct [:method, :path, :url_query, :nonce, :signature]
+  defstruct [:method, :path, :uri, :nonce, :signature]
 end
