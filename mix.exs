@@ -9,6 +9,7 @@ defmodule BitcoinDe.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       description: description(),
+      package: package(),
       deps: deps(),
       name: "BitcoinDe",
       source_url: "https://github.com/balugege/bitcoin-de-elixir"
@@ -22,12 +23,13 @@ defmodule BitcoinDe.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.11.2"},
-      {:poison, "~> 3.1.0"}
+      {:poison, "~> 3.1.0"},
+      {:ex_doc, ">= 0.0.0", only: :dev},
     ]
   end
 
   defp description do
-
+    "SDK to connect to the api of www.bitcoin.de an online bitcoin marketplace."
   end
 
   defp package do
