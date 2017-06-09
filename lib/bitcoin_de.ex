@@ -34,7 +34,6 @@ defmodule BitcoinDe do
 
   @spec evaluate(%ApiRequest{}, tuple) :: %HTTPoison.Response{}
   defp evaluate(api_request = %ApiRequest{method: :get}, {_, credentials}) do
-    %{host: host} = Application.get_env(:bitcoin_de, :server)
     headers = [
       "X-API-KEY": credentials.key,
       "X-API-NONCE": api_request.nonce,

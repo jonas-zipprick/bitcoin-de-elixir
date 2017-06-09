@@ -19,7 +19,7 @@ defmodule BitcoinDe.ApiRequestBuilder do
       Atom.to_string(dict)
     end
 
-    def inspect(dict, opts) do
+    def inspect(dict, _) do
       Atom.to_string(dict)
     end
   end
