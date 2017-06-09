@@ -35,7 +35,7 @@ defmodule BitcoinDe.Mixfile do
   defp package do
     [
       name: :bitcoin_de,
-      files: ["lib", "mix.exs", "README.md", "config/config.exs"],
+      files: ["lib", "mix.exs", "README.md"],
       maintainers: ["Jonas Zipprick"],
       licenses: ["Apache 2.0"],
       links: %{"GitHub" => "https://github.com/balugege/bitcoin-de-elixir"}

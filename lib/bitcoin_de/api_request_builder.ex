@@ -54,7 +54,7 @@ defmodule BitcoinDe.ApiRequestBuilder do
                 |> url_encode
 
     uri = Enum.join([
-      (Application.get_env(:bitcoin_de, :server) |> Map.fetch!(:host)),
+      "https://api.bitcoin.de",
       api_request.path,
       (if api_request.method == :get && url_query != "", do: "?", else: ""),
       (if api_request.method == :get, do: url_query, else: "")
@@ -78,7 +78,7 @@ defmodule BitcoinDe.ApiRequestBuilder do
       (api_request.nonce |> Kernel.inspect),
       md5_hash], "#")
 
-    signature = Application.get_env(:bitcoin_de, :credentials)
+    signature = credentials 
                 |> Map.fetch!(:secret)
                 |> (&(:crypto.hmac(:sha256, &1, hmac_data))).()
                 |> Base.encode16
