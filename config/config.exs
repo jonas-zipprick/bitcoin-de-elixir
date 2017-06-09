@@ -4,7 +4,7 @@ import_config "config.secret.exs"
 
 config :logger,
   backends: [:console],
-  compile_time_purge_level: :debug
+  compile_time_purge_level: :info
 
 config :bitcoin_de, server: 
   %{
