@@ -29,7 +29,7 @@ defmodule BitcoinDe.Mixfile do
   end
 
   defp description do
-    "SDK to connect to the api of www.bitcoin.de an online bitcoin marketplace."
+    "Elixir API wrapper for www.bitcoin.de an online bitcoin marketplace."
   end
 
   defp package do
