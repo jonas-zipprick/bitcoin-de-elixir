@@ -104,4 +104,11 @@ defmodule BitcoinDe.ApiRequestBuilder do
     %ApiRequest{method: :get, path: "/v1/trades/history", nonce: nonce()} 
     |> add_signature(params, credentials)
   end
+
+  @spec show_account_info(%Credentials{}) :: %ApiRequest{}
+  def show_account_info(credentials = %Credentials{}) do
+    params = []
+    %ApiRequest{method: :get, path: "/v1/account", nonce: nonce()} 
+    |> add_signature(params, credentials)
+  end
 end
