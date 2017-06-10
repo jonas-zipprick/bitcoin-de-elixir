@@ -1,4 +1,4 @@
-# BitcoinDe
+# BitcoinDe Elixir
 
 Elixir API wrapper for www.bitcoin.de an online bitcoin marketplace.
 
