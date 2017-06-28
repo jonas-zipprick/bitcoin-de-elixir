@@ -41,38 +41,64 @@ defmodule BitcoinDe.ApiRequestBuilder do
                 |> (&(url_query <> &1 <> "=")).()
     url_query = head
                 |> elem(1)
-                |> Kernel.inspect
+                |> (&(if is_binary(&1), do: &1, else: Kernel.inspect(&1))).()
                 |> (&(url_query <> &1)).()
     url_encode(tail, url_query)
   end
 
   @spec add_signature(%ApiRequest{}, params, %Credentials{}) :: %ApiRequest{} 
-  defp add_signature(api_request = %ApiRequest{}, params, credentials = %Credentials{}) do
+  defp add_signature(api_request = %ApiRequest{method: :post}, params, credentials = %Credentials{}) do
+
+    url_query_list = params
+                     |> Enum.map(fn {k, v} -> {k, inspect(v)} end)
+
+    url_query = params
+                |> Enum.filter(fn({_, v}) -> v != nil end)
+                |> sort
+                |> url_encode
+
+    md5_hash = :crypto.hash(:md5, url_query)
+               |> Base.encode16()
+               |> String.downcase
+                
+    uri = Enum.join([
+      "https://api.bitcoin.de",
+      api_request.path
+    ])
+
+    hmac_data = Enum.join([
+      "POST",
+      uri,
+      (credentials |> Map.fetch!(:key)),
+      (api_request.nonce |> Kernel.inspect),
+      md5_hash], "#")
+
+    IO.inspect hmac_data
+
+    signature = credentials
+                |> Map.fetch!(:secret)
+                |> (&(:crypto.hmac(:sha256, &1, hmac_data))).()
+                |> Base.encode16
+                |> String.downcase
+    %ApiRequest{api_request | uri: uri, signature: signature, url_query: url_query_list}
+  end
+  
+  defp add_signature(api_request = %ApiRequest{method: :get}, params, credentials = %Credentials{}) do
     url_query = params 
                 |> Enum.filter(fn({_, v}) -> v != nil end) 
-                |> sort 
                 |> url_encode
 
     uri = Enum.join([
       "https://api.bitcoin.de",
       api_request.path,
-      (if api_request.method == :get && url_query != "", do: "?", else: ""),
-      (if api_request.method == :get, do: url_query, else: "")
+      (if url_query != "", do: "?", else: ""),
+      url_query
     ])
 
-    md5_hash = 
-      if api_request.method == :post do
-        :crypto.hash(:md5, url_query) 
-        |> Base.encode16() 
-        |> String.downcase
-      else 
-        # md5 of ""
-        "d41d8cd98f00b204e9800998ecf8427e"
-      end
-
+    md5_hash = "d41d8cd98f00b204e9800998ecf8427e"
 
     hmac_data = Enum.join([
-      (if api_request.method == :post, do: "POST", else: "GET"),
+      "GET",
       uri,
       (credentials |> Map.fetch!(:key)),
       (api_request.nonce |> Kernel.inspect),
@@ -86,6 +112,7 @@ defmodule BitcoinDe.ApiRequestBuilder do
 
     %ApiRequest{api_request | uri: uri, signature: signature}
   end
+
 
   defp nonce() do
     :os.system_time(:millisecond)
@@ -109,6 +136,20 @@ defmodule BitcoinDe.ApiRequestBuilder do
   def show_account_info(credentials = %Credentials{}) do
     params = []
     %ApiRequest{method: :get, path: "/v1/account", nonce: nonce()} 
+    |> add_signature(params, credentials)
+  end
+
+  @spec execute_trade(%Credentials{}, integer, atom, float) :: %ApiRequest{}
+  def execute_trade(credentials = %Credentials{}, order_id, type, amount) do
+    params = [type: type, amount: amount]
+    %ApiRequest{method: :post, path: "/v1/trades/" <> order_id, nonce: nonce()}
+    |> add_signature(params, credentials)
+  end
+
+  @spec create_order(%Credentials{}, atom, float, float) :: %ApiRequest{}
+  def create_order(credentials = %Credentials{}, type, max_amount, price) do
+    params = [type: type, max_amount: max_amount, price: price]
+    %ApiRequest{method: :post, path: "/v1/orders" ,nonce: nonce()}
     |> add_signature(params, credentials)
   end
 end
